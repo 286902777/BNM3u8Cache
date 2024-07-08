@@ -63,9 +63,9 @@
     __weak __typeof(self) weakSelf= self;
     BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc]initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
         if(progressBlock) progressBlock(progress);
-    }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrlString) {
+    }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrlString, NSString * _Nullable name) {
         ///下载回调
-        if(resultBlock) resultBlock(error,localPlayUrlString);
+        if(resultBlock) resultBlock(error,localPlayUrlString,name);
         LOCK(weakSelf.operationSemaphore);
         [weakSelf.downloadOperationsMap removeObjectForKey:config.url];
         UNLOCK(weakSelf.operationSemaphore);
@@ -132,7 +132,10 @@
 - (AFURLSessionManager *)sessionManager
 {
     if (!_sessionManager) {
-        _sessionManager = [[AFURLSessionManager alloc]initWithSessionConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]];
+        NSURLSessionConfiguration * config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier: @"video_down"];
+        config.discretionary = YES;
+        config.sessionSendsLaunchEvents = YES;
+        _sessionManager = [[AFURLSessionManager alloc]initWithSessionConfiguration: config];
         _sessionManager.completionQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     }
     return _sessionManager;

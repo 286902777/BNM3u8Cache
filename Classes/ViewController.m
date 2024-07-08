@@ -136,7 +136,7 @@
                     [self.progressView addSubview:label];
                 }
             });
-        }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl) {
+        }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name) {
             if(localPlayUrl)
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
