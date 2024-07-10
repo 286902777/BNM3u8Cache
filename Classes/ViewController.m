@@ -152,7 +152,7 @@
 
 - (void)cannel
 {
-    [BNM3U8Manager.shareInstance cancelAll];
+    [BNM3U8Manager.shareInstance cancels: self.urlArr];
 }
 
 - (void)clearRootPath
@@ -166,11 +166,11 @@
 }
 
 - (void)suspend{
-    [BNM3U8Manager.shareInstance suspend];
+    [BNM3U8Manager.shareInstance suspends:self.urlArr];
 }
 
 - (void)resume{
-    [BNM3U8Manager.shareInstance resume];
+    [BNM3U8Manager.shareInstance resumes:self.urlArr];
 }
 
 - (void)playWithUrlString:(NSString *)urlStr idx:(NSInteger)idx

@@ -47,13 +47,12 @@ typedef void(^BNM3U8DownloadProgressBlock)(CGFloat progress);
  */
 - (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config progressBlock:(BNM3U8DownloadProgressBlock)progressBlock resultBlock:(BNM3U8DownloadResultBlock)resultBlock;
 
-- (void)cannel:(NSString *)url;
 
-- (void)cancelAll;
+- (void)cancels:(NSArray *)urls;
 
-- (void)suspend;
+- (void)suspends:(NSArray *)urls;
 
-- (void)resume;
+- (void)resumes: (NSArray *)urls;
 @end
 
 NS_ASSUME_NONNULL_END

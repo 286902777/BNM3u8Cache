@@ -77,10 +77,6 @@
 }
 
 - (void)cannel:(NSString *)url{
-    [self _cannel:url];
-}
-
-- (void)_cannel:(NSString *)url{
     LOCK(_operationSemaphore);
     BNM3U8DownloadOperation *operation = [_downloadOperationsMap valueForKey:url];
     UNLOCK(_operationSemaphore);
@@ -96,35 +92,59 @@
 }
 
 /*全部取消,遍历operation cnnel. queue的cannel all operation 只能在创建/重新创建或者 dealloc时执行*/
-- (void)cancelAll{
+- (void)cancels:(NSArray *)urls{
     LOCK(_operationSemaphore);
-    NSArray *urls = _downloadOperationsMap.allKeys;
+    NSArray *arr = _downloadOperationsMap.allKeys;
     UNLOCK(_operationSemaphore);
-    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        [self _cannel:url];
+    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        for (NSString * u in urls) {
+            if ([u isEqualToString:url]) {
+                [self cannel:url];
+            }
+        }
     }];
 }
 
-- (void)suspend{
+//- (void)suspend{
+//    if(_downloadQueue.suspended) return;
+//    _downloadQueue.suspended = YES;
+//    LOCK(_operationSemaphore);
+//    NSArray *urls = _downloadOperationsMap.allKeys;
+//    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+//        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
+//        [operation suspend];
+//    }];
+//    UNLOCK(_operationSemaphore);
+//}
+
+- (void)suspends: (NSArray *)urls{
     if(_downloadQueue.suspended) return;
     _downloadQueue.suspended = YES;
     LOCK(_operationSemaphore);
-    NSArray *urls = _downloadOperationsMap.allKeys;
-    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
-        [operation suspend];
+    NSArray *arr = _downloadOperationsMap.allKeys;
+    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        for (NSString * u in urls) {
+            if ([u isEqualToString:url]) {
+                BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
+                [operation suspend];
+            }
+        }
     }];
     UNLOCK(_operationSemaphore);
 }
 
-- (void)resume{
+- (void)resumes:(NSArray *)urls{
     if(!_downloadQueue.suspended) return;
     _downloadQueue.suspended = NO;
     LOCK(_operationSemaphore);
-    NSArray *urls = _downloadOperationsMap.allKeys;
-    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
-        [operation resume];
+    NSArray *arr = _downloadOperationsMap.allKeys;
+    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        for (NSString * u in urls) {
+            if ([u isEqualToString:url]) {
+                BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
+                [operation resume];
+            }
+        }
     }];
     UNLOCK(_operationSemaphore);
 }
