@@ -83,16 +83,17 @@ NSString *fullPerfixPath(NSString *rootPath,NSString *url){
      https://bitmovin-a.akamaihd.net/content/playhouse-vr/
      */
     /*如果是相对路径 需要特殊处理*/
-    if([m3u8String containsString:@"../"])
+    NSString * path = @"";
+    if(![m3u8String containsString:@"http"])
     {
         NSRange r;
         NSString *a = OriUrlString;
-        for (int i = 0; i < 2; i ++) {
+        for (int i = 0; i < 1; i ++) {
             r = [a rangeOfString:@"/" options:NSBackwardsSearch];
             a = [a substringToIndex:r.location];
         }
         a = [a stringByAppendingString:@"/"];
-        m3u8String = [m3u8String stringByReplacingOccurrencesOfString:@"../" withString:a];
+        path = a;
     }
     BNM3U8PlistInfo *info = [BNM3U8PlistInfo new];
     info.version = [[m3u8String subStringFrom:@"#EXT-X-VERSION:" to:@"#"] removeSpaceAndNewline];
@@ -127,7 +128,12 @@ NSString *fullPerfixPath(NSString *rootPath,NSString *url){
             BNM3U8fileInfo *fileInfo = [BNM3U8fileInfo new];
             fileInfo.duration = [m3u8String subStringFrom:@"#EXTINF:" to:@","];
             m3u8String = [m3u8String subStringForm:@"," offset:1];
-            fileInfo.oriUrlString = [[m3u8String subStringTo:@"#"] removeSpaceAndNewline];
+            NSString * p = [[m3u8String subStringTo:@"#"] removeSpaceAndNewline];
+            if (path.length > 0) {
+                fileInfo.oriUrlString = [NSString stringWithFormat: @"%@%@", path, p];
+            } else {
+                fileInfo.oriUrlString = p;
+            }
             NSRange exRange = [m3u8String rangeOfString:@"#EX"];
             NSRange discontinuityRange = [m3u8String rangeOfString:@"#EXT-X-DISCONTINUITY"];
             if (exRange.location == discontinuityRange.location) {
