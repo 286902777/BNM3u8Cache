@@ -136,6 +136,9 @@
                     [self.progressView addSubview:label];
                 }
             });
+        }supendBlock:^(int64_t size) {
+            NSLog(@"%lld", size);
+            NSLog(@"%0.2f/KS", size / 1024.0);
         }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name) {
             if(localPlayUrl)
             {

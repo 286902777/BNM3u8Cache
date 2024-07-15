@@ -11,6 +11,7 @@
 
 @interface BNM3U8FileDownLoadOperation ()
 @property (nonatomic, strong) NSObject <BNM3U8FileDownloadProtocol> *fileInfo;
+@property (nonatomic, strong) BNM3U8FileDownLoadOperationSupendBlock supendBlock;
 @property (nonatomic, strong) BNM3U8FileDownLoadOperationResultBlock resultBlock;
 @property (nonatomic, strong) AFURLSessionManager *sessionManager;
 @property (assign, nonatomic, getter = isExecuting) BOOL executing;
@@ -23,11 +24,14 @@
 @synthesize executing = _executing;
 @synthesize finished = _finished;
 
-- (instancetype)initWithFileInfo:(NSObject <BNM3U8FileDownloadProtocol> *)fileInfo sessionManager:(AFURLSessionManager*)sessionManager resultBlock:(BNM3U8FileDownLoadOperationResultBlock)resultBlock{
+- (instancetype)initWithFileInfo:(NSObject <BNM3U8FileDownloadProtocol> *)fileInfo sessionManager:(AFURLSessionManager*)sessionManager
+       supendBlock:(BNM3U8FileDownLoadOperationSupendBlock)supendBlock
+       resultBlock:(BNM3U8FileDownLoadOperationResultBlock)resultBlock{
     NSParameterAssert(fileInfo);
     self = [super init];
     if (self) {
         _fileInfo = fileInfo;
+        _supendBlock = supendBlock;
         _resultBlock = resultBlock;
         _sessionManager = sessionManager;
     }
@@ -52,8 +56,14 @@
         
         NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:_fileInfo.downloadUrl]];
         __block NSData *data = nil;
+        __block int64_t dataCount = 0;
         __weak __typeof(self) weakSelf = self;
         NSURLSessionDownloadTask *downloadTask = [self.sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+            if (dataCount >= downloadProgress.totalUnitCount) {
+                dataCount = 0;
+            }
+            weakSelf.supendBlock(downloadProgress.completedUnitCount - dataCount);
+            dataCount = downloadProgress.completedUnitCount;
 #if DEBUG
             NSLog(@"%@:%0.2lf%%\n",weakSelf.fileInfo.downloadUrl, (float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount * 100);
 #endif
