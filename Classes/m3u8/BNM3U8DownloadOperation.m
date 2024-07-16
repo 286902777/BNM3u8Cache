@@ -25,7 +25,6 @@
 @property (nonatomic, copy) NSString *downloadDstRootPath;
 @property (nonatomic, copy) BNM3U8DownloadOperationResultBlock resultBlock;
 @property (nonatomic, copy) BNM3U8DownloadOperationProgressBlock progressBlock;
-@property (nonatomic, copy) BNM3U8DownloadOperationSupendBlock supendBlock;
 @property (nonatomic, strong) NSMutableDictionary <NSString*,BNM3U8FileDownLoadOperation*> *downloadOperationsMap;
 @property (nonatomic, strong) BNM3U8PlistInfo *plistInfo;
 @property (nonatomic, strong) dispatch_semaphore_t operationSemaphore;
@@ -44,7 +43,6 @@
 @synthesize suspend = _suspend;
 
 - (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
-      supendBlock:(BNM3U8DownloadOperationSupendBlock)supendBlock
       resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock{
     NSParameterAssert(config);
     NSParameterAssert(path);
@@ -54,7 +52,6 @@
         _downloadDstRootPath = path;
         _resultBlock = resultBlock;
         _progressBlock = progressBlock;
-        _supendBlock = supendBlock;
         _executing = NO;
         _finished = NO;
         _suspend = NO;
@@ -90,12 +87,10 @@
             return;
         }
         void (^subOperationlock)(void) = ^(void) {
-            [self.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [weakSelf.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSParameterAssert(obj.downloadUrl);
                 BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager
-                  supendBlock:^(int64_t size) {
-                    self.supendBlock(size);
-                } resultBlock:^(NSError * _Nullable error, id _Nullable info) {
+                resultBlock:^(NSError * _Nullable error, id _Nullable info) {
                     
                     LOCK(self.operationSemaphore);
                     [self removeOperationFormMapWithUrl:obj.downloadUrl];

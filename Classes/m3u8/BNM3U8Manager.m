@@ -51,7 +51,6 @@
 
 #pragma mark -
 - (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
-      supendBlock:(BNM3U8DownloadSupendBlock)supendBlock
       resultBlock:(BNM3U8DownloadResultBlock)resultBlock{
     
     NSParameterAssert(config.url);
@@ -65,8 +64,6 @@
     __weak __typeof(self) weakSelf= self;
     BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc]initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
         if(progressBlock) progressBlock(progress);
-    } supendBlock:^(int64_t size) {
-        if(supendBlock) supendBlock(size);
     }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrlString, NSString * _Nullable name) {
         ///下载回调
         if(resultBlock) resultBlock(error,localPlayUrlString,name);

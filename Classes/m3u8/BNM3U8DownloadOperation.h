@@ -14,7 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^BNM3U8DownloadOperationResultBlock)( NSError * _Nullable error, NSString * _Nullable relativeUrl, NSString * _Nullable name);
 typedef void(^BNM3U8DownloadOperationProgressBlock)(CGFloat progress);
-typedef void(^BNM3U8DownloadOperationSupendBlock)(int64_t size);
 /*
  继承 NSOperation 需实相关方法，包括状态控制
  
@@ -22,7 +21,6 @@ typedef void(^BNM3U8DownloadOperationSupendBlock)(int64_t size);
  */
 @interface BNM3U8DownloadOperation : NSOperation
 - (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
-    supendBlock:(BNM3U8DownloadOperationSupendBlock)supendBlock
     resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock;
 - (void)suspend;
 - (void)resume;

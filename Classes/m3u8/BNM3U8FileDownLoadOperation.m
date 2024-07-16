@@ -11,7 +11,6 @@
 
 @interface BNM3U8FileDownLoadOperation ()
 @property (nonatomic, strong) NSObject <BNM3U8FileDownloadProtocol> *fileInfo;
-@property (nonatomic, strong) BNM3U8FileDownLoadOperationSupendBlock supendBlock;
 @property (nonatomic, strong) BNM3U8FileDownLoadOperationResultBlock resultBlock;
 @property (nonatomic, strong) AFURLSessionManager *sessionManager;
 @property (assign, nonatomic, getter = isExecuting) BOOL executing;
@@ -25,13 +24,11 @@
 @synthesize finished = _finished;
 
 - (instancetype)initWithFileInfo:(NSObject <BNM3U8FileDownloadProtocol> *)fileInfo sessionManager:(AFURLSessionManager*)sessionManager
-       supendBlock:(BNM3U8FileDownLoadOperationSupendBlock)supendBlock
        resultBlock:(BNM3U8FileDownLoadOperationResultBlock)resultBlock{
     NSParameterAssert(fileInfo);
     self = [super init];
     if (self) {
         _fileInfo = fileInfo;
-        _supendBlock = supendBlock;
         _resultBlock = resultBlock;
         _sessionManager = sessionManager;
     }
@@ -57,15 +54,19 @@
         NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:_fileInfo.downloadUrl]];
         __block NSData *data = nil;
         __block int64_t dataCount = 0;
+        __block int64_t sCount = 0;
         __weak __typeof(self) weakSelf = self;
         NSURLSessionDownloadTask *downloadTask = [self.sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
             if (dataCount >= downloadProgress.totalUnitCount) {
                 dataCount = 0;
             }
-            weakSelf.supendBlock(downloadProgress.completedUnitCount - dataCount);
+            if (sCount != downloadProgress.completedUnitCount - dataCount) {
+                sCount = downloadProgress.completedUnitCount - dataCount;
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"Noti_DownSize" object:nil userInfo:@{@"url": weakSelf.fileInfo.downloadUrl, @"size": @(sCount)}];
+            }
             dataCount = downloadProgress.completedUnitCount;
 #if DEBUG
-            NSLog(@"%@:%0.2lf%%\n",weakSelf.fileInfo.downloadUrl, (float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount * 100);
+//            NSLog(@"%@:%0.2lf%%\n",weakSelf.fileInfo.downloadUrl, (float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount * 100);
 #endif
         } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
             data = [NSData dataWithContentsOfURL:targetPath];
@@ -76,8 +77,8 @@
                 }
                 else
                 {
-                    weakSelf.resultBlock(error,self.fileInfo);
-                    [self done];
+                    weakSelf.resultBlock(error, self.fileInfo);
+                    [weakSelf done];
                 }
         }];
         self.dataTask = downloadTask;
