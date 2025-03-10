@@ -23,9 +23,7 @@ typedef void(^BNM3U8DownloadOperationSpeedBlock)(NSInteger data);
  上层使用NSOperationQueue去控制并发，全局控制
  */
 @interface BNM3U8DownloadOperation : NSOperation
-- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
-    speedBlock:(BNM3U8DownloadOperationSpeedBlock)speedBlock
-    resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock;
+- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock speedBlock:(BNM3U8DownloadOperationSpeedBlock)speedBlock resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock;
 - (void)suspend;
 - (void)resume;
 @end

@@ -44,9 +44,7 @@
 @synthesize finished = _finished;
 @synthesize suspend = _suspend;
 
-- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager        progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
-       speedBlock:(BNM3U8DownloadOperationSpeedBlock)speedBlock
-      resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock{
+- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock speedBlock:(BNM3U8DownloadOperationSpeedBlock)speedBlock resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock{
     NSParameterAssert(config);
     NSParameterAssert(path);
     self = [super init];
