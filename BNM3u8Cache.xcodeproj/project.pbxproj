@@ -143,6 +143,7 @@
 				BB8E5D6922B3A1A300623A0D /* BNM3U8FileDownLoadOperation.m */,
 				BB8E5D5A22B399A100623A0D /* BNM3U8AnalysisService.h */,
 				BB8E5D5B22B399A100623A0D /* BNM3U8AnalysisService.m */,
+				BB8E5D6422B39EDB00623A0D /* BNM3U8FileDownloadProtocol.h */,
 				DBAABB7422F5666400501D6A /* category */,
 				BB8E5D5D22B39D4800623A0D /* entity */,
 			);
@@ -152,7 +153,6 @@
 		BB8E5D5D22B39D4800623A0D /* entity */ = {
 			isa = PBXGroup;
 			children = (
-				BB8E5D6422B39EDB00623A0D /* BNM3U8FileDownloadProtocol.h */,
 				BB8E5D6C22B3B0CB00623A0D /* BNM3U8PlistInfo.h */,
 				BB8E5D6D22B3B0CB00623A0D /* BNM3U8PlistInfo.m */,
 				DBAABC0622F56A0200501D6A /* BNM3U8fileInfo.h */,
