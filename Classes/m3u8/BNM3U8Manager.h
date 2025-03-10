@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 //};
 
 ///rootPath 对应的是local http service 的 root path
-typedef void(^BNM3U8DownloadResultBlock)(NSError * _Nullable error, NSString * _Nullable localPlayUrl);
+typedef void(^BNM3U8DownloadResultBlock)(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name);
 typedef void(^BNM3U8DownloadProgressBlock)(CGFloat progress);
 typedef void(^BNM3U8DownloadSpeedBlock)(NSInteger speed);
 

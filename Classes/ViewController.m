@@ -136,6 +136,8 @@
                     [self.progressView addSubview:label];
                 }
             });
+        } speedBlock:^(NSInteger speed) {
+            
         }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name) {
             if(localPlayUrl)
             {
