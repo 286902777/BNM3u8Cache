@@ -129,15 +129,13 @@
         /*单个媒体下载的文件并发数控制*/
         dlConfig.maxConcurrenceCount = 5;
         dlConfig.localhost = @"http://127.0.0.1:8080/";
-        [BNM3U8Manager.shareInstance downloadVideoWithConfig:dlConfig progressBlock:^(CGFloat progress) {
+        [BNM3U8Manager.shareInstance downloadVideoWithConfig:dlConfig progressBlock:^(CGFloat progress, int64_t count) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 label.text = [NSString stringWithFormat:@"%.00f%%",progress * 100];
                 if (!label.superview) {
                     [self.progressView addSubview:label];
                 }
             });
-        } speedBlock:^(NSInteger speed) {
-            
         }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name) {
             if(localPlayUrl)
             {
