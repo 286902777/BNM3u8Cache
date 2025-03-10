@@ -46,9 +46,10 @@ typedef void(^BNM3U8DownloadSpeedBlock)(NSInteger speed);
 /*下载队列中添加
  创建operation  添加到queue中。 系统控制执行
  */
-- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
-       speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
-      resultBlock:(BNM3U8DownloadResultBlock)resultBlock;
+- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config 
+                  progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+                     speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
+                    resultBlock:(BNM3U8DownloadResultBlock)resultBlock;
 
 - (void)cannel:(NSString *)url;
 

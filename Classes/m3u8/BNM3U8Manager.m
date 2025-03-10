@@ -50,9 +50,10 @@
 }
 
 #pragma mark -
-- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config       progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
-       speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
-      resultBlock:(BNM3U8DownloadResultBlock)resultBlock{
+- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config
+                  progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+                     speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
+                    resultBlock:(BNM3U8DownloadResultBlock)resultBlock{
     
     NSParameterAssert(config.url);
     LOCK(_operationSemaphore);
