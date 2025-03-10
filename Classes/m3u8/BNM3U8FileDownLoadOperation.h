@@ -12,7 +12,7 @@
 
 /* 一个 fileOperation 只负责下载一个文件*/
 NS_ASSUME_NONNULL_BEGIN
-typedef void(^BNM3U8FileDownLoadOperationResultBlock)(NSError * _Nullable error,id _Nullable info);
+typedef void(^BNM3U8FileDownLoadOperationResultBlock)(NSError * _Nullable error,id _Nullable info, NSInteger count);
 @interface BNM3U8FileDownLoadOperation : NSOperation
 - (instancetype)initWithFileInfo:(NSObject <BNM3U8FileDownloadProtocol> *)fileInfo sessionManager:(AFURLSessionManager*)sessionManager
        resultBlock:(BNM3U8FileDownLoadOperationResultBlock)resultBlock;

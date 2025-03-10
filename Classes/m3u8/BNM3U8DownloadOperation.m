@@ -94,17 +94,18 @@
         void (^subOperationlock)(void) = ^(void) {
             [self.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSParameterAssert(obj.downloadUrl);
-                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager resultBlock:^(NSError * _Nullable error, id _Nullable info) {
+                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager resultBlock:^(NSError * _Nullable error, id _Nullable info, NSInteger sCount) {
                     
-                    LOCK(self.operationSemaphore);
-                    [self removeOperationFormMapWithUrl:obj.downloadUrl];
-                    UNLOCK(self.operationSemaphore);
+                    LOCK(weakSelf.operationSemaphore);
+                    [weakSelf removeOperationFormMapWithUrl:obj.downloadUrl];
+                    UNLOCK(weakSelf.operationSemaphore);
                     
-                    LOCK(self.downloadResultCountSemaphore);
-                    [self acceptFileDownloadResult:!error];
-                    UNLOCK(self.downloadResultCountSemaphore);
-                    
-                    [self tryCallBack];
+                    LOCK(weakSelf.downloadResultCountSemaphore);
+                    [weakSelf acceptFileDownloadResult:!error];
+                    UNLOCK(weakSelf.downloadResultCountSemaphore);
+                    if(weakSelf.speedBlock) weakSelf.speedBlock(sCount);
+
+                    [weakSelf tryCallBack];
                 }];
                 [weakSelf.downloadQueue addOperation:operation];
                 LOCK(weakSelf.operationSemaphore);
@@ -247,7 +248,6 @@
         }
         else{
             NSString *m3u8String = [BNM3U8AnalysisService synthesisLocalM3u8Withm3u8Info:_plistInfo withLocaHost:self.config.localhost];
-            if(_speedBlock) _speedBlock(m3u8String.length);
             NSString *dstPath = [[_downloadDstRootPath stringByAppendingPathComponent:[_config.url md5]]stringByAppendingPathComponent:@"dst.m3u8"];
             [[BNFileManager shareInstance]saveDate:[m3u8String dataUsingEncoding:NSUTF8StringEncoding] ToFile:dstPath completaionHandler:^(NSError *error) {
                 if (!error) {

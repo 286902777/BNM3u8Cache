@@ -46,7 +46,7 @@
         }
         
         if([BNFileManager exitItemWithPath:_fileInfo.dstFilePath]){
-            _resultBlock(nil,_fileInfo);
+            _resultBlock(nil,_fileInfo, 0);
             [self done];
             return;
         }
@@ -62,7 +62,6 @@
             }
             if (sCount != downloadProgress.completedUnitCount - dataCount) {
                 sCount = downloadProgress.completedUnitCount - dataCount;
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"Noti_DownSize" object:nil userInfo:@{@"url": weakSelf.fileInfo.downloadUrl, @"size": @(sCount)}];
             }
             dataCount = downloadProgress.completedUnitCount;
 #if DEBUG
@@ -77,7 +76,7 @@
                 }
                 else
                 {
-                    weakSelf.resultBlock(error, self.fileInfo);
+                    weakSelf.resultBlock(error, self.fileInfo, sCount);
                     [weakSelf done];
                 }
         }];
@@ -113,9 +112,10 @@
 
 - (void)saveData:(NSData *)data
 {
+    __weak __typeof(self) weakSelf = self;
     [[BNFileManager shareInstance] saveDate:data ToFile:[_fileInfo dstFilePath] completaionHandler:^(NSError *error) {
-            if(self.resultBlock) self.resultBlock(error, self.fileInfo);
-            [self done];
+            if(weakSelf.resultBlock) weakSelf.resultBlock(error, weakSelf.fileInfo, 0);
+            [weakSelf done];
     }];
 }
 
