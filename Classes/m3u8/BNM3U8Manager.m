@@ -50,7 +50,8 @@
 }
 
 #pragma mark -
-- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+- (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config       progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+       speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
       resultBlock:(BNM3U8DownloadResultBlock)resultBlock{
     
     NSParameterAssert(config.url);
@@ -62,11 +63,13 @@
     }
     UNLOCK(_operationSemaphore);
     __weak __typeof(self) weakSelf= self;
-    BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc]initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
+    BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc] initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
         if(progressBlock) progressBlock(progress);
-    }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrlString, NSString * _Nullable name) {
+    } speedBlock:^(NSInteger data) {
+        if(speedBlock) speedBlock(data);
+    } resultBlock:^(NSError * _Nullable error, NSString * _Nullable relativeUrl) {
         ///下载回调
-        if(resultBlock) resultBlock(error,localPlayUrlString,name);
+        if(resultBlock) resultBlock(error, relativeUrl);
         LOCK(weakSelf.operationSemaphore);
         [weakSelf.downloadOperationsMap removeObjectForKey:config.url];
         UNLOCK(weakSelf.operationSemaphore);
@@ -78,6 +81,10 @@
 }
 
 - (void)cannel:(NSString *)url{
+    [self _cannel:url];
+}
+
+- (void)_cannel:(NSString *)url{
     LOCK(_operationSemaphore);
     BNM3U8DownloadOperation *operation = [_downloadOperationsMap valueForKey:url];
     UNLOCK(_operationSemaphore);
@@ -93,59 +100,35 @@
 }
 
 /*全部取消,遍历operation cnnel. queue的cannel all operation 只能在创建/重新创建或者 dealloc时执行*/
-- (void)cancels:(NSArray *)urls{
+- (void)cancelAll{
     LOCK(_operationSemaphore);
-    NSArray *arr = _downloadOperationsMap.allKeys;
+    NSArray *urls = _downloadOperationsMap.allKeys;
     UNLOCK(_operationSemaphore);
-    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        for (NSString * u in urls) {
-            if ([u isEqualToString:url]) {
-                [self cannel:url];
-            }
-        }
+    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self _cannel:url];
     }];
 }
 
-//- (void)suspend{
-//    if(_downloadQueue.suspended) return;
-//    _downloadQueue.suspended = YES;
-//    LOCK(_operationSemaphore);
-//    NSArray *urls = _downloadOperationsMap.allKeys;
-//    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-//        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
-//        [operation suspend];
-//    }];
-//    UNLOCK(_operationSemaphore);
-//}
-
-- (void)suspends: (NSArray *)urls{
+- (void)suspend{
     if(_downloadQueue.suspended) return;
     _downloadQueue.suspended = YES;
     LOCK(_operationSemaphore);
-    NSArray *arr = _downloadOperationsMap.allKeys;
-    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        for (NSString * u in urls) {
-            if ([u isEqualToString:url]) {
-                BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
-                [operation suspend];
-            }
-        }
+    NSArray *urls = _downloadOperationsMap.allKeys;
+    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
+        [operation suspend];
     }];
     UNLOCK(_operationSemaphore);
 }
 
-- (void)resumes:(NSArray *)urls{
+- (void)resume{
     if(!_downloadQueue.suspended) return;
     _downloadQueue.suspended = NO;
     LOCK(_operationSemaphore);
-    NSArray *arr = _downloadOperationsMap.allKeys;
-    [arr enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
-        for (NSString * u in urls) {
-            if ([u isEqualToString:url]) {
-                BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
-                [operation resume];
-            }
-        }
+    NSArray *urls = _downloadOperationsMap.allKeys;
+    [urls enumerateObjectsUsingBlock:^(NSString * _Nonnull url, NSUInteger idx, BOOL * _Nonnull stop) {
+        BNM3U8DownloadOperation *operation = [self.downloadOperationsMap valueForKey:url];
+        [operation resume];
     }];
     UNLOCK(_operationSemaphore);
 }
@@ -153,10 +136,9 @@
 - (AFURLSessionManager *)sessionManager
 {
     if (!_sessionManager) {
-        NSURLSessionConfiguration * config = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier: @"video_down"];
-        config.discretionary = YES;
-        config.sessionSendsLaunchEvents = YES;
-        _sessionManager = [[AFURLSessionManager alloc]initWithSessionConfiguration: config];
+        NSURLSessionConfiguration * s = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"video_down"];
+        s.sessionSendsLaunchEvents = YES;
+        _sessionManager = [[AFURLSessionManager alloc] initWithSessionConfiguration:s];
         _sessionManager.completionQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     }
     return _sessionManager;

@@ -25,8 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 //};
 
 ///rootPath 对应的是local http service 的 root path
-typedef void(^BNM3U8DownloadResultBlock)(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name);
+typedef void(^BNM3U8DownloadResultBlock)(NSError * _Nullable error, NSString * _Nullable localPlayUrl);
 typedef void(^BNM3U8DownloadProgressBlock)(CGFloat progress);
+typedef void(^BNM3U8DownloadSpeedBlock)(NSInteger speed);
 
 @interface BNM3U8ManagerConfig : NSObject
 @property (nonatomic, copy) NSString *downloadDstRootPath;
@@ -46,14 +47,16 @@ typedef void(^BNM3U8DownloadProgressBlock)(CGFloat progress);
  创建operation  添加到queue中。 系统控制执行
  */
 - (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+       speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
       resultBlock:(BNM3U8DownloadResultBlock)resultBlock;
 
+- (void)cannel:(NSString *)url;
 
-- (void)cancels:(NSArray *)urls;
+- (void)cancelAll;
 
-- (void)suspends:(NSArray *)urls;
+- (void)suspend;
 
-- (void)resumes: (NSArray *)urls;
+- (void)resume;
 @end
 
 NS_ASSUME_NONNULL_END

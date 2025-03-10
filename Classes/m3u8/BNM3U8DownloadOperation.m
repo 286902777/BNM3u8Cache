@@ -25,6 +25,8 @@
 @property (nonatomic, copy) NSString *downloadDstRootPath;
 @property (nonatomic, copy) BNM3U8DownloadOperationResultBlock resultBlock;
 @property (nonatomic, copy) BNM3U8DownloadOperationProgressBlock progressBlock;
+@property (nonatomic, copy) BNM3U8DownloadOperationSpeedBlock speedBlock;
+
 @property (nonatomic, strong) NSMutableDictionary <NSString*,BNM3U8FileDownLoadOperation*> *downloadOperationsMap;
 @property (nonatomic, strong) BNM3U8PlistInfo *plistInfo;
 @property (nonatomic, strong) dispatch_semaphore_t operationSemaphore;
@@ -42,7 +44,8 @@
 @synthesize finished = _finished;
 @synthesize suspend = _suspend;
 
-- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
+- (instancetype)initWithConfig:(BNM3U8DownloadConfig *)config downloadDstRootPath:(NSString *)path sessionManager:(AFURLSessionManager *)sessionManager        progressBlock:(BNM3U8DownloadOperationProgressBlock)progressBlock
+       speedBlock:(BNM3U8DownloadOperationSpeedBlock)speedBlock
       resultBlock:(BNM3U8DownloadOperationResultBlock)resultBlock{
     NSParameterAssert(config);
     NSParameterAssert(path);
@@ -52,6 +55,7 @@
         _downloadDstRootPath = path;
         _resultBlock = resultBlock;
         _progressBlock = progressBlock;
+        _speedBlock = speedBlock;
         _executing = NO;
         _finished = NO;
         _suspend = NO;
@@ -82,15 +86,15 @@
         
         if (![self tryCreateRootDir]) {
             NSError *error = [NSError errorWithDomain:@"创建文件目录失败" code:100 userInfo:nil];
-            self.resultBlock(error, nil, nil);
+            self.resultBlock(error, nil);
             [self done];
             return;
         }
+        
         void (^subOperationlock)(void) = ^(void) {
-            [weakSelf.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [self.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSParameterAssert(obj.downloadUrl);
-                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager
-                resultBlock:^(NSError * _Nullable error, id _Nullable info) {
+                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager resultBlock:^(NSError * _Nullable error, id _Nullable info) {
                     
                     LOCK(self.operationSemaphore);
                     [self removeOperationFormMapWithUrl:obj.downloadUrl];
@@ -121,7 +125,7 @@
                         return;
                     }
                     if (error) {
-                        self.resultBlock(error, nil, nil);
+                        self.resultBlock(error, nil);
                         [self done];
                         return;
                     }
@@ -232,24 +236,25 @@
     BOOL finish = _downloadSuccessCount + _downloadFailCount == _plistInfo.fileInfos.count;
     BOOL failed = _downloadFailCount > 0;
     NSInteger failedCount = _downloadFailCount;
-    if(_progressBlock && _plistInfo.fileInfos.count > 0) _progressBlock(_downloadSuccessCount/(_plistInfo.fileInfos.count * 1.0));
+    if(_progressBlock) _progressBlock(_downloadSuccessCount/(_plistInfo.fileInfos.count * 1.0));
     UNLOCK(_downloadResultCountSemaphore);
     if (finish) {
         if (failed) {
             ///存在文件下载失败
             NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"failed download count is %ld",failedCount] code:(NSInteger)100 userInfo:@{@"info":_plistInfo}];
-            if(_resultBlock) _resultBlock(error,nil,nil);
+            if(_resultBlock) _resultBlock(error,nil);
             [self done];
         }
         else{
             NSString *m3u8String = [BNM3U8AnalysisService synthesisLocalM3u8Withm3u8Info:_plistInfo withLocaHost:self.config.localhost];
+            if(_speedBlock) _speedBlock(m3u8String.length);
             NSString *dstPath = [[_downloadDstRootPath stringByAppendingPathComponent:[_config.url md5]]stringByAppendingPathComponent:@"dst.m3u8"];
             [[BNFileManager shareInstance]saveDate:[m3u8String dataUsingEncoding:NSUTF8StringEncoding] ToFile:dstPath completaionHandler:^(NSError *error) {
                 if (!error) {
-                    if(self.resultBlock) self.resultBlock(nil,[[self.config.localhost stringByAppendingString:[self.config.url md5]]stringByAppendingString:@"/dst.m3u8"], [self.config.url md5]);
+                    if(self.resultBlock) self.resultBlock(nil,[[self.config.localhost stringByAppendingString:[self.config.url md5]]stringByAppendingString:@"/dst.m3u8"]);
                 }
                 else{
-                    if(self.resultBlock) self.resultBlock(error,nil,nil);
+                    if(self.resultBlock) self.resultBlock(error,nil);
                 }
                 [self done];
             }];
