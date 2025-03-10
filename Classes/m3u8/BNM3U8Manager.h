@@ -51,13 +51,11 @@ typedef void(^BNM3U8DownloadSpeedBlock)(NSInteger speed);
                      speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
                     resultBlock:(BNM3U8DownloadResultBlock)resultBlock;
 
-- (void)cannel:(NSString *)url;
+- (void)cancels:(NSArray *)urls;
 
-- (void)cancelAll;
+- (void)suspends:(NSArray *)urls;
 
-- (void)suspend;
-
-- (void)resume;
+- (void)resumes: (NSArray *)urls;
 @end
 
 NS_ASSUME_NONNULL_END
