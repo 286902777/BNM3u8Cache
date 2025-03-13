@@ -92,18 +92,18 @@
         void (^subOperationlock)(void) = ^(void) {
             [self.plistInfo.fileInfos enumerateObjectsUsingBlock:^(BNM3U8fileInfo * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSParameterAssert(obj.downloadUrl);
-                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager resultBlock:^(NSError * _Nullable error, id _Nullable info, NSInteger sCount) {
+                BNM3U8FileDownLoadOperation *operation = [[BNM3U8FileDownLoadOperation alloc]initWithFileInfo:obj sessionManager:self.sessionManager speedBlock:^(int64_t count) {
+                    if(self.speedBlock) self.speedBlock(count);
+                } resultBlock:^(NSError * _Nullable error, id _Nullable info) {
                     
-                    LOCK(weakSelf.operationSemaphore);
-                    [weakSelf removeOperationFormMapWithUrl:obj.downloadUrl];
-                    UNLOCK(weakSelf.operationSemaphore);
+                    LOCK(self.operationSemaphore);
+                    [self removeOperationFormMapWithUrl:obj.downloadUrl];
+                    UNLOCK(self.operationSemaphore);
                     
-                    LOCK(weakSelf.downloadResultCountSemaphore);
-                    [weakSelf acceptFileDownloadResult:!error];
-                    UNLOCK(weakSelf.downloadResultCountSemaphore);
-                    if(weakSelf.speedBlock) weakSelf.speedBlock(sCount);
-
-                    [weakSelf tryCallBack];
+                    LOCK(self.downloadResultCountSemaphore);
+                    [self acceptFileDownloadResult:!error];
+                    UNLOCK(self.downloadResultCountSemaphore);
+                    [self tryCallBack];
                 }];
                 [weakSelf.downloadQueue addOperation:operation];
                 LOCK(weakSelf.operationSemaphore);

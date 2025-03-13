@@ -93,10 +93,7 @@
      一些免费的m3u8链接【格式可能不兼容，需要分析处理】
      https://bitmovin.com/mpeg-dash-hls-examples-sample-streams/
      */
-    self.urlArr = @[@"https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8s/105560_video_360_1000000.m3u8",
-                    @"https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8s/105560_video_540_1500000.m3u8",
-                    @"https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8s/105560_video_720_3000000.m3u8",
-                    @"https://bitmovin-a.akamaihd.net/content/playhouse-vr/m3u8s/105560_video_1080_5000000.m3u8"
+    self.urlArr = @[@"https://prodnew.pixelmedialis.com/movies/68400199-9c93-4be1-96f8-8f72fcf00700-237116/index.m3u8"
     ].mutableCopy;
 }
 
@@ -129,13 +126,15 @@
         /*单个媒体下载的文件并发数控制*/
         dlConfig.maxConcurrenceCount = 5;
         dlConfig.localhost = @"http://127.0.0.1:8080/";
-        [BNM3U8Manager.shareInstance downloadVideoWithConfig:dlConfig progressBlock:^(CGFloat progress, int64_t count) {
+        [BNM3U8Manager.shareInstance downloadVideoWithConfig:dlConfig progressBlock:^(CGFloat progress) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 label.text = [NSString stringWithFormat:@"%.00f%%",progress * 100];
                 if (!label.superview) {
                     [self.progressView addSubview:label];
                 }
             });
+        }speedBlock:^(int64_t speed) {
+            NSLog(@"%lld", speed);
         }resultBlock:^(NSError * _Nullable error, NSString * _Nullable localPlayUrl, NSString * _Nullable name) {
             if(localPlayUrl)
             {

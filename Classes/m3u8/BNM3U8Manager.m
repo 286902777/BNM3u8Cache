@@ -52,6 +52,7 @@
 #pragma mark -
 - (void)downloadVideoWithConfig:(BNM3U8DownloadConfig *)config
                   progressBlock:(BNM3U8DownloadProgressBlock)progressBlock
+                     speedBlock:(BNM3U8DownloadSpeedBlock)speedBlock
                     resultBlock:(BNM3U8DownloadResultBlock)resultBlock{
     
     NSParameterAssert(config.url);
@@ -63,12 +64,11 @@
     }
     UNLOCK(_operationSemaphore);
     __weak __typeof(self) weakSelf= self;
-    __block int64_t sCount = 0;
 
     BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc] initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
-        if(progressBlock) progressBlock(progress, sCount);
+        if(progressBlock) progressBlock(progress);
     } speedBlock:^(int64_t data) {
-        sCount = data;
+        if(speedBlock) speedBlock(data);
     } resultBlock:^(NSError * _Nullable error, NSString * _Nullable relativeUrl, NSString * _Nullable name) {
         ///下载回调
         if(resultBlock) resultBlock(error, relativeUrl, name);

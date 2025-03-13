@@ -11,6 +11,7 @@
 
 @interface BNM3U8FileDownLoadOperation ()
 @property (nonatomic, strong) NSObject <BNM3U8FileDownloadProtocol> *fileInfo;
+@property (nonatomic, strong) BNM3U8FileDownLoadOperationSpeedBlock speedBlock;
 @property (nonatomic, strong) BNM3U8FileDownLoadOperationResultBlock resultBlock;
 @property (nonatomic, strong) AFURLSessionManager *sessionManager;
 @property (assign, nonatomic, getter = isExecuting) BOOL executing;
@@ -24,11 +25,12 @@
 @synthesize finished = _finished;
 
 - (instancetype)initWithFileInfo:(NSObject <BNM3U8FileDownloadProtocol> *)fileInfo sessionManager:(AFURLSessionManager*)sessionManager
-       resultBlock:(BNM3U8FileDownLoadOperationResultBlock)resultBlock{
+                      speedBlock:(nonnull BNM3U8FileDownLoadOperationSpeedBlock)speedBlock resultBlock:(nonnull BNM3U8FileDownLoadOperationResultBlock)resultBlock {
     NSParameterAssert(fileInfo);
     self = [super init];
     if (self) {
         _fileInfo = fileInfo;
+        _speedBlock = speedBlock;
         _resultBlock = resultBlock;
         _sessionManager = sessionManager;
     }
@@ -46,7 +48,7 @@
         }
         
         if([BNFileManager exitItemWithPath:_fileInfo.dstFilePath]){
-            _resultBlock(nil,_fileInfo, 0);
+            _resultBlock(nil,_fileInfo);
             [self done];
             return;
         }
@@ -64,6 +66,9 @@
                 sCount = downloadProgress.completedUnitCount - dataCount;
             }
             dataCount = downloadProgress.completedUnitCount;
+            if (weakSelf.speedBlock) {
+                weakSelf.speedBlock(sCount);
+            }
 #if DEBUG
 //            NSLog(@"%@:%0.2lf%%\n",weakSelf.fileInfo.downloadUrl, (float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount * 100);
 #endif
@@ -76,7 +81,7 @@
                 }
                 else
                 {
-                    weakSelf.resultBlock(error, self.fileInfo, sCount);
+                    weakSelf.resultBlock(error, self.fileInfo);
                     [weakSelf done];
                 }
         }];
@@ -114,7 +119,7 @@
 {
     __weak __typeof(self) weakSelf = self;
     [[BNFileManager shareInstance] saveDate:data ToFile:[_fileInfo dstFilePath] completaionHandler:^(NSError *error) {
-            if(weakSelf.resultBlock) weakSelf.resultBlock(error, weakSelf.fileInfo, 0);
+            if(weakSelf.resultBlock) weakSelf.resultBlock(error, weakSelf.fileInfo);
             [weakSelf done];
     }];
 }
