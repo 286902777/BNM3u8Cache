@@ -52,8 +52,11 @@
             [self done];
             return;
         }
+
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:_fileInfo.downloadUrl]];
+        request.timeoutInterval = 15;
+        self.sessionManager.session.configuration.timeoutIntervalForRequest = 15;
         
-        NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:_fileInfo.downloadUrl]];
         __block NSData *data = nil;
         __block int64_t dataCount = 0;
         __block int64_t sCount = 0;
@@ -64,11 +67,12 @@
             }
             if (sCount != downloadProgress.completedUnitCount - dataCount) {
                 sCount = downloadProgress.completedUnitCount - dataCount;
+                if (weakSelf.speedBlock) {
+                    weakSelf.speedBlock(sCount);
+                }
             }
             dataCount = downloadProgress.completedUnitCount;
-            if (weakSelf.speedBlock) {
-                weakSelf.speedBlock(sCount);
-            }
+            
 #if DEBUG
 //            NSLog(@"%@:%0.2lf%%\n",weakSelf.fileInfo.downloadUrl, (float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount * 100);
 #endif
@@ -76,14 +80,16 @@
             data = [NSData dataWithContentsOfURL:targetPath];
             return nil;
         } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+            if (weakSelf != nil) {
                 if (!error) {
                     [weakSelf saveData:data];
                 }
                 else
                 {
-                    weakSelf.resultBlock(error, self.fileInfo);
+                    weakSelf.resultBlock(error, weakSelf.fileInfo);
                     [weakSelf done];
                 }
+            }
         }];
         self.dataTask = downloadTask;
         [downloadTask resume];

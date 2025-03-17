@@ -103,7 +103,11 @@
                     LOCK(self.downloadResultCountSemaphore);
                     [self acceptFileDownloadResult:!error];
                     UNLOCK(self.downloadResultCountSemaphore);
-                    [self tryCallBack];
+                    if (!error) {
+                        [self tryCallBack];
+                    } else {
+                        if(self.resultBlock) self.resultBlock(error,nil,nil);
+                    }
                 }];
                 [weakSelf.downloadQueue addOperation:operation];
                 LOCK(weakSelf.operationSemaphore);
@@ -237,7 +241,7 @@
     NSInteger failedCount = _downloadFailCount;
     if(_progressBlock) _progressBlock(_downloadSuccessCount/(_plistInfo.fileInfos.count * 1.0));
     UNLOCK(_downloadResultCountSemaphore);
-    if (finish) {
+    if (finish && self.plistInfo.fileInfos.count > 0) {
         if (failed) {
             ///存在文件下载失败
             NSError *error = [NSError errorWithDomain:[NSString stringWithFormat:@"failed download count is %ld",failedCount] code:(NSInteger)100 userInfo:@{@"info":_plistInfo}];

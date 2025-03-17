@@ -72,9 +72,9 @@
     } resultBlock:^(NSError * _Nullable error, NSString * _Nullable relativeUrl, NSString * _Nullable name) {
         ///下载回调
         if(resultBlock) resultBlock(error, relativeUrl, name);
-        LOCK(weakSelf.operationSemaphore);
-        [weakSelf.downloadOperationsMap removeObjectForKey:config.url];
-        UNLOCK(weakSelf.operationSemaphore);
+        LOCK(self.operationSemaphore);
+        [self.downloadOperationsMap removeObjectForKey:config.url];
+        UNLOCK(self.operationSemaphore);
     }];
     LOCK(_operationSemaphore);
     [_downloadOperationsMap setValue:operation forKey:config.url];
@@ -83,6 +83,9 @@
 }
 
 - (void)cannel:(NSString *)url{
+    if ([_downloadOperationsMap valueForKey:url] == nil) {
+        return;
+    }
     LOCK(_operationSemaphore);
     BNM3U8DownloadOperation *operation = [_downloadOperationsMap valueForKey:url];
     UNLOCK(_operationSemaphore);

@@ -130,7 +130,12 @@ NSString *fullPerfixPath(NSString *rootPath,NSString *url){
             m3u8String = [m3u8String subStringForm:@"," offset:1];
             NSString * p = [[m3u8String subStringTo:@"#"] removeSpaceAndNewline];
             if (path.length > 0) {
-                fileInfo.oriUrlString = [NSString stringWithFormat: @"%@%@", path, p];
+                NSArray *array = [p componentsSeparatedByString:@"/"]; //字符串按照【分隔成数组
+                if (array.lastObject != nil) {
+                    fileInfo.oriUrlString = [NSString stringWithFormat: @"%@%@", path, array.lastObject];
+                } else {
+                    fileInfo.oriUrlString = [NSString stringWithFormat: @"%@%@", path, p];
+                }
             } else {
                 fileInfo.oriUrlString = p;
             }
