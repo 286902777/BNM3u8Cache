@@ -54,8 +54,6 @@
         }
 
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:_fileInfo.downloadUrl]];
-        request.timeoutInterval = 15;
-        self.sessionManager.session.configuration.timeoutIntervalForRequest = 15;
         
         __block NSData *data = nil;
         __block int64_t dataCount = 0;

@@ -30,6 +30,7 @@
 		346AB1258A52E9822848AE44 /* Pods-BNM3u8Cache.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BNM3u8Cache.release.xcconfig"; path = "Pods/Target Support Files/Pods-BNM3u8Cache/Pods-BNM3u8Cache.release.xcconfig"; sourceTree = "<group>"; };
 		3B31B297642897B33DE29848 /* Pods-m3u8Demo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-m3u8Demo.release.xcconfig"; path = "Pods/Target Support Files/Pods-m3u8Demo/Pods-m3u8Demo.release.xcconfig"; sourceTree = "<group>"; };
 		77F40A43F5AD920C1712CC19 /* libPods-BNM3u8Cache.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-BNM3u8Cache.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7CC31632D89712800707A0A /* HFM3U8FileDownloadOperation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HFM3U8FileDownloadOperation.swift; sourceTree = "<group>"; };
 		A7E7BD13C4599BDCE30D82DC /* Pods-BNM3u8Cache.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BNM3u8Cache.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BNM3u8Cache/Pods-BNM3u8Cache.debug.xcconfig"; sourceTree = "<group>"; };
 		BB65F46E239E365B009342E1 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		BB6A6C8C23A085F6009BCE53 /* BNM3u8Cache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BNM3u8Cache.h; sourceTree = "<group>"; };
@@ -141,6 +142,7 @@
 				BB8E5D5822B3980E00623A0D /* BNM3U8DownloadOperation.m */,
 				BB8E5D6822B3A1A300623A0D /* BNM3U8FileDownLoadOperation.h */,
 				BB8E5D6922B3A1A300623A0D /* BNM3U8FileDownLoadOperation.m */,
+				A7CC31632D89712800707A0A /* HFM3U8FileDownloadOperation.swift */,
 				BB8E5D5A22B399A100623A0D /* BNM3U8AnalysisService.h */,
 				BB8E5D5B22B399A100623A0D /* BNM3U8AnalysisService.m */,
 				BB8E5D6422B39EDB00623A0D /* BNM3U8FileDownloadProtocol.h */,

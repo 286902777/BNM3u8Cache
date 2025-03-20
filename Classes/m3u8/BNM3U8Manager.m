@@ -63,7 +63,6 @@
         return;
     }
     UNLOCK(_operationSemaphore);
-    __weak __typeof(self) weakSelf= self;
 
     BNM3U8DownloadOperation *operation =  [[BNM3U8DownloadOperation alloc] initWithConfig:config downloadDstRootPath:self.config.downloadDstRootPath sessionManager:self.sessionManager progressBlock:^(CGFloat progress) {
         if(progressBlock) progressBlock(progress);

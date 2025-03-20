@@ -10,6 +10,6 @@ target 'BNM3u8Cache' do
 # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
 
 
-pod 'AFNetworking', '~> 3.0'
+pod 'AFNetworking', '~> 4.0'
 pod "GCDWebServer", "~> 3.5.3"
 end
